@@ -1,0 +1,23 @@
+body {
+    background: #F6F6F7;
+}
+
+/* news card */
+
+@media only screen and (max-width: 575px) {
+    .news-card {
+        max-width: 400px;
+    }
+
+    .news-card .thumbnail {
+        width: 100%;
+        object-fit: cover;
+        height: 250px;
+    }
+}
+
+@media screen and (max-width: 767px) {
+    .read-more-btn {
+        width: 100%;
+    }
+}
