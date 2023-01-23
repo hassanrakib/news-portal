@@ -66,7 +66,7 @@
                 <div class="d-flex justify-content-between align-items-center d-md-block">
                     <label for="sort-news">Sort By View:</label>
                     <select class="border-0 rounded bg-white p-2" name="sort-news" id="sort-news">
-                        <option value="most-viewed" selected>Most Viewed</option>
+                        <option value="most-viewed">Most Viewed</option>
                         <option value="least-viewed">Least Viewed</option>
                     </select>
                 </div>
@@ -80,6 +80,34 @@
                 <div id="all-news-in-a-category">
                     <!-- error message or news cards will be here -->
                 </div>
+                <!-- show modal when clicked on read more button -->
+                <div class="modal fade" id="newsDetails" tabindex="-1" aria-labelledby="newsDetailsLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="newsDetailsLabel"></h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="card">
+                                    <img src="" class="card-img-top" alt="news thumbnail">
+                                    <div class="d-flex align-items-center mt-3 ms-2">
+                                        <img src="" class="rounded-circle news-author-img" alt="avatar">
+                                        <div class="ms-2">
+                                            <small class="mb-0 news-author"></small>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                      <p class="card-text"></p>
+                                    </div>
+                                  </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- spinner while loading news -->
                 <div class="spinner d-none align-items-center" style="height: 250px">
                     <div class="spinner-grow text-primary" style="width: 3rem; height: 3rem;" role="status">

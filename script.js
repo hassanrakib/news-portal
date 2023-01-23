@@ -2,7 +2,8 @@
 function loadNewsCategories() {
     fetch(`https://openapi.programming-hero.com/api/news/categories`)
         .then(response => response.json())
-        .then(object => displayCategories(object.data.news_category));
+        .then(object => displayCategories(object.data.news_category))
+        .catch(err => console.log(err.message));
 }
 
 function displayCategories(categories) {
@@ -22,6 +23,10 @@ function displayCategories(categories) {
 // load all news in a category and display them
 async function loadAllNewsInACategory(categoryId, categoryName) {
 
+    // sort select element set to most viewed at first when change categories
+    const sortSelectElement = document.querySelector("#sort-news");
+    sortSelectElement.value = "most-viewed";
+
     const allNewsInACategoryContainer = document.querySelector("#all-news-in-a-category");
     // remove previous child nodes of all news container
     removeAllChild(allNewsInACategoryContainer);
@@ -35,7 +40,7 @@ async function loadAllNewsInACategory(categoryId, categoryName) {
         // sort in most viewed first
         sortNews(object.data, allNewsInACategoryContainer);
         // then add event handler to the select element to change order
-        document.querySelector("#sort-news").onchange = () => sortNews(object.data, allNewsInACategoryContainer);
+        sortSelectElement.onchange = () => sortNews(object.data, allNewsInACategoryContainer);
 
         // display how much items found in a category
         showItemsFoundMessage(object.data, categoryName);
@@ -87,7 +92,7 @@ function addAllNewsToUI(allNews, allNewsInACategoryContainer) {
                             <i class="fa-regular fa-eye"></i><small class="ms-2">${news.total_view ?? 'Not Available'}</small>
                         </div>
                         <div class="col-12 col-md text-end mt-4 mt-md-0">
-                            <button class="btn btn-primary read-more-btn">Read More<i
+                            <button onclick="loadNewsDetails('${news._id}')" data-bs-toggle="modal" data-bs-target="#newsDetails" class="btn btn-primary read-more-btn">Read More<i
                                     class="ms-2 fa-regular fa-circle-right"></i></button>
                         </div>
                     </div>
@@ -99,6 +104,23 @@ function addAllNewsToUI(allNews, allNewsInACategoryContainer) {
     })
 }
 
+// get details of a news
+async function loadNewsDetails(newsId) {
+    const response = await fetch(`https://openapi.programming-hero.com/api/news/${newsId}`);
+    const object = await response.json();
+    displayNewsInModal(object.data[0]);
+}
+
+// display the news details in a modal
+function displayNewsInModal(newsDetails) {
+    const modal = document.querySelector("#newsDetails");
+    modal.querySelector(".modal-title").textContent = newsDetails.title;
+    modal.querySelector(".card-img-top").src = newsDetails.image_url;
+    modal.querySelector(".news-author").textContent = newsDetails.author?.name || 'Not Available';
+    modal.querySelector(".news-author-img").src = newsDetails.author?.img;
+    modal.querySelector(".card-text").textContent = newsDetails.details;
+}
+
 
 // sort news
 function sortNews(allNews, allNewsInACategoryContainer) {
@@ -108,7 +130,6 @@ function sortNews(allNews, allNewsInACategoryContainer) {
     }
 
     const sortOrder = document.querySelector("#sort-news").value;
-    console.log(sortOrder);
     if (sortOrder === "most-viewed") {
         allNews.sort((a, b) => b.total_view - a.total_view);
         addAllNewsToUI(allNews, allNewsInACategoryContainer);
