@@ -6,7 +6,6 @@ function loadNewsCategories() {
 }
 
 function displayCategories(categories) {
-    console.log(categories);
     const categoriesUl = document.getElementById("categories");
     categories.forEach(category => {
         const categoryLi = document.createElement("li");
@@ -27,23 +26,43 @@ async function loadAllNewsInACategory(categoryId, categoryName) {
     // remove previous child nodes of all news container
     removeAllChild(allNewsInACategoryContainer);
 
-    // show spinner while fetching
-    toggleSpinner(true);
+    try {
+        // show spinner while fetching
+        toggleSpinner(true);
         const response = await fetch(`https://openapi.programming-hero.com/api/news/category/${categoryId}`);
         const object = await response.json();
+
+        // sort in most viewed first
+        sortNews(object.data, allNewsInACategoryContainer);
+        // then add event handler to the select element to change order
+        document.querySelector("#sort-news").onchange = () => sortNews(object.data, allNewsInACategoryContainer);
+
+        // display how much items found in a category
+        showItemsFoundMessage(object.data, categoryName);
+    } catch (err) {
+
+        // exact error in console
+        console.log(err.message);
+
+        // error in ui
+        const errorContainer = document.createElement("p");
+        errorContainer.className = "text-decoration-underline pt-5 mt-5";
+        errorContainer.textContent = "Error: Unable to load news!";
+        allNewsInACategoryContainer.appendChild(errorContainer);
+    } finally {
         // hide spinner after fetching done
         toggleSpinner(false);
-        displayAllNewsInACategory(object.data, categoryName, allNewsInACategoryContainer);
+    }
 }
 
-function displayAllNewsInACategory(allNews, categoryName, allNewsInACategoryContainer) {
+function showItemsFoundMessage(allNews, categoryName) {
     // showing items found message
     const itemsFoundContainer = document.querySelector("#items-found");
     itemsFoundContainer.textContent = `${allNews.length} items found for category ${categoryName}`;
+}
 
-
+function addAllNewsToUI(allNews, allNewsInACategoryContainer) {
     allNews.forEach(news => {
-        console.log(news);
         const newsCard = document.createElement("div");
         newsCard.className = "card mb-3";
         newsCard.innerHTML = `
@@ -60,12 +79,12 @@ function displayAllNewsInACategory(allNews, categoryName, allNewsInACategoryCont
                         <div class="col-6 col-md d-flex align-items-center">
                             <img src="${news.author.img}" class="rounded-circle news-author-img" alt="avatar">
                             <div class="d-flex flex-column ms-2">
-                                <small class="mb-0">${news.author.name}</small>
-                                <small class="mb-0 text-muted">${news.author?.published_date?.split(" ")[0]}</small>
+                                <small class="mb-0">${news.author?.name || 'Not Available'}</small>
+                                <small class="mb-0 text-muted">${news.author?.published_date?.split(" ")[0] ?? 'Not Available'}</small>
                             </div>
                         </div>
                         <div class="col-6 text-center col-md">
-                            <i class="fa-regular fa-eye"></i><small class="ms-2">${news.total_view}</small>
+                            <i class="fa-regular fa-eye"></i><small class="ms-2">${news.total_view ?? 'Not Available'}</small>
                         </div>
                         <div class="col-12 col-md text-end mt-4 mt-md-0">
                             <button class="btn btn-primary read-more-btn">Read More<i
@@ -79,6 +98,26 @@ function displayAllNewsInACategory(allNews, categoryName, allNewsInACategoryCont
         allNewsInACategoryContainer.appendChild(newsCard);
     })
 }
+
+
+// sort news
+function sortNews(allNews, allNewsInACategoryContainer) {
+    // remove previous news in the container
+    if (allNewsInACategoryContainer.childNodes) {
+        removeAllChild(allNewsInACategoryContainer);
+    }
+
+    const sortOrder = document.querySelector("#sort-news").value;
+    console.log(sortOrder);
+    if (sortOrder === "most-viewed") {
+        allNews.sort((a, b) => b.total_view - a.total_view);
+        addAllNewsToUI(allNews, allNewsInACategoryContainer);
+    } else {
+        allNews.sort((a, b) => a.total_view - b.total_view);
+        addAllNewsToUI(allNews, allNewsInACategoryContainer);
+    }
+}
+
 
 // spinner
 function toggleSpinner(isLoading) {
@@ -100,4 +139,4 @@ function removeAllChild(parent) {
 }
 
 loadNewsCategories();
-loadAllNewsInACategory("08", 'All News');
+loadAllNewsInACategory("08", "All News");
